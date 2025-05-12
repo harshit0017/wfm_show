@@ -1,0 +1,7 @@
+my-notion-dashboard/
+├── pages/
+│   ├── index.js
+│   └── api/
+│       └── notion.js
+├── .env.local
+├── package.json

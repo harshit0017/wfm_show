@@ -1,0 +1,21 @@
+{
+    "name": "my_notion_dashboard",
+    "version": "1.0.0",
+    "description": "",
+    "main": "main.js",
+    "scripts": {
+      "dev": "next dev",
+      "build": "next build",
+      "start": "next start"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+      "@notionhq/client": "^3.0.1",
+      "next": "^15.3.2",
+      "react": "^19.1.0",
+      "react-dom": "^19.1.0"
+    }
+  }
+  

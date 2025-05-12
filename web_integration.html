@@ -1,0 +1,99 @@
+<!-- Wolf Mentoring Top 10 Interviews Embed -->
+<div id="wolf-dashboard" style="max-width: 1000px; margin: 0 auto; padding: 2rem; font-family: sans-serif;">
+    <h2 style="
+      text-align: center;
+      font-size: 2rem;
+      color: #2c3e50;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+    ">Wolf Mentoring – Top 10 Interviews</h2>
+  
+    <div id="wolf-table-wrapper" style="
+      max-height: 400px;
+      overflow-y: auto;
+      border: 1px solid #dfe3e8;
+    "></div>
+  </div>
+  
+  <script>
+    (async function loadWolfTable() {
+      try {
+        const res = await fetch('/api/notion');
+        if (!res.ok) throw new Error('Network response was not ok');
+        const { results } = await res.json();
+  
+        // Take the 10 most recent (assuming results is already sorted newest → oldest)
+        const top10 = Array.isArray(results) ? results.slice(0, 10) : [];
+  
+        // Build table
+        const table = document.createElement('table');
+        table.style.width = '100%';
+        table.style.borderCollapse = 'collapse';
+        table.style.minWidth = '600px';
+  
+        // Header
+        const thead = document.createElement('thead');
+        thead.innerHTML = `
+          <tr>
+            <th style="
+              background: #2c3e50;
+              color: #fff;
+              padding: .75rem 1rem;
+              text-align: left;
+              font-weight: 600;
+              border-bottom: 2px solid #1a252f;
+            ">Title</th>
+            <th style="
+              background: #2c3e50;
+              color: #fff;
+              padding: .75rem 1rem;
+              text-align: left;
+              font-weight: 600;
+              border-bottom: 2px solid #1a252f;
+            ">Company</th>
+            <th style="
+              background: #2c3e50;
+              color: #fff;
+              padding: .75rem 1rem;
+              text-align: left;
+              font-weight: 600;
+              border-bottom: 2px solid #1a252f;
+            ">Date</th>
+          </tr>
+        `;
+        table.appendChild(thead);
+  
+        // Body
+        const tbody = document.createElement('tbody');
+        top10.forEach((row, i) => {
+          const tr = document.createElement('tr');
+          tr.style.borderBottom = '1px solid #dfe3e8';
+          if (i % 2 === 1) tr.style.background = '#f9fbfc';
+          tr.onmouseover = () => tr.style.background = '#eaeff2';
+          tr.onmouseout = () => tr.style.background = (i % 2 === 1 ? '#f9fbfc' : '');
+  
+          tr.innerHTML = `
+            <td style="padding: .75rem 1rem;">
+              <a href="${row.url}" target="_blank" rel="noopener noreferrer" style="
+                color: #2980b9;
+                text-decoration: none;
+                font-weight: 500;
+              ">${row.title}</a>
+            </td>
+            <td style="padding: .75rem 1rem;">${row.company}</td>
+            <td style="padding: .75rem 1rem;">${row.date}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+        table.appendChild(tbody);
+  
+        // Insert into wrapper
+        document.getElementById('wolf-table-wrapper').appendChild(table);
+      } catch (err) {
+        console.error('Failed to load Wolf Mentoring table:', err);
+        const wrapper = document.getElementById('wolf-table-wrapper');
+        wrapper.innerHTML = `<p style="padding:1rem; color:#c0392b; text-align:center;">Error loading data</p>`;
+      }
+    })();
+  </script>
+  
