@@ -25,8 +25,49 @@ export default function Home() {
     load();
   }, []);
 
-  if (loading) return <p className="status-message">Loading…</p>;
-  if (error)   return <p className="status-message error">Error: {error}</p>;
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <div className="spinner" />
+        <p className="status-message">Loading…</p>
+        <style jsx>{`
+          .loading-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            background-color: #f2f4f7;
+            z-index: 999;
+          }
+          .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #e0e0e0;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+          }
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+          .status-message {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 1.25rem;
+          }
+        `}</style>
+      </div>
+    );
+  }
+
+  if (error) return <p className="status-message error">Error: {error}</p>;
 
   return (
     <div className="container">
@@ -36,6 +77,11 @@ export default function Home() {
       ) : (
         <div className="table-wrapper">
           <table>
+            <colgroup>
+              <col style={{ width: '50%' }} />
+              <col style={{ width: '30%' }} />
+              <col style={{ width: '20%' }} />
+            </colgroup>
             <thead>
               <tr>
                 <th>Title</th>
@@ -61,25 +107,6 @@ export default function Home() {
       )}
 
       <style jsx>{`
-        /* Page styles */
-        body {
-          background-color: #f2f4f7;
-        }
-        .container {
-          max-width: 1200px;
-          margin: 0 auto;
-          padding: 3rem;
-          background-color: #ffffff;
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-            Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-        }
-        h1 {
-          text-align: center;
-          font-size: 2.75rem;
-          color: #2c3e50;
-          margin-bottom: 2rem;
-          font-weight: 700;
-        }
         .status-message {
           text-align: center;
           color: #7f8c8d;
@@ -90,24 +117,40 @@ export default function Home() {
           color: #c0392b;
         }
 
-        /* Table container and scroll */
+        .container {
+          max-width: 1200px;
+          margin: 2rem auto;
+          padding: 2rem;
+          background-color: #ffffff;
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+            Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+        h1 {
+          text-align: center;
+          font-size: 2.5rem;
+          color: #2c3e50;
+          margin-bottom: 1.5rem;
+          font-weight: 700;
+        }
+
         .table-wrapper {
           max-height: 600px;
           overflow-y: auto;
-          overflow-x: auto;
           border: 1px solid #dfe3e8;
         }
 
-        /* Table styles */
         table {
           width: 100%;
           border-collapse: collapse;
-          min-width: 800px;
+          table-layout: fixed;
         }
         th,
         td {
           padding: 1rem 1.25rem;
           text-align: left;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
         th {
           background: #2c3e50;
@@ -133,7 +176,6 @@ export default function Home() {
           text-decoration: underline;
         }
 
-        /* Remove border radii for blunt edges */
         .container,
         .table-wrapper,
         table,
