@@ -85,21 +85,48 @@ export default async function handler(req, res) {
         start_cursor: cursor,
         page_size: 100,
       });
+    
+    console.log('✅ Raw Notion Response:', JSON.stringify(results, null, 2));
 
+
+    // const formatted = results.map(page => {
+    //   const p = page.properties;
+    //   return {
+    //     title: extractText(p["Job Title"] ?? p.Name),
+    //     company: getCompanyName(p.Company),
+    //     date:    extractText(p.Date),
+    //     url:     page.url ?? '#',
+    //   };
+    // });
+    // // 2) Filter out any “empty” rows where title, company or date is just “—”
+    // const filtered = formatted.filter(
+    //   r => r.title !== '—' && r.company !== '—' && r.date !== '—'
+    // );
     const formatted = results.map(page => {
       const p = page.properties;
       return {
-        title:   extractText(p.Name),
-        company: getCompanyName(p.Company),
-        date:    extractText(p.Date),
-        url:     page.url ?? '#',
+        title: Array.isArray(p["Job Title"]?.title)
+                            ? p["Job Title"].title.map(t => t.plain_text).join('').trim()
+                            : '—',
+        company: p["Company"]?.rich_text?.[0]?.plain_text || '—',
+        date: p["Date"]?.date?.start
+                            ? new Date(p["Date"].date.start).toLocaleDateString('en-IN') // or 'en-US'
+                            : '—',
+        url:     page.url || '#',
       };
     });
-    // 2) Filter out any “empty” rows where title, company or date is just “—”
+    
     const filtered = formatted.filter(
-      r => r.title !== '—' && r.company !== '—' && r.date !== '—'
+      r =>
+        r.title &&
+        r.title.trim() !== '' &&
+        r.company &&
+        r.company.trim() !== '' &&
+        r.date &&
+        r.date.trim() !== ''
     );
-
+    
+    
     // 3) Send back only the good rows
     return res.status(200).json({
       results:   filtered,

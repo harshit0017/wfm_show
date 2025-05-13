@@ -5,28 +5,22 @@ export default function Home() {
   const [rows, setRows]         = useState([]);
   const [loading, setLoading]   = useState(true);
   const [error, setError]       = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     let isMounted = true;
-
-    // Recursive fetcher: grabs one “page” (up to 100 rows) at a time
     const fetchPage = async (cursor = null, isFirst = true) => {
       try {
         const qs = cursor ? `?cursor=${cursor}` : '';
         const res = await fetch(`/api/notion${qs}`);
+      
+        console.log("✅ Fetched data:", res);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const { results, nextCursor } = await res.json();
-
         if (!isMounted) return;
-        // append new batch
         setRows(prev => [...prev, ...results]);
-        // after first batch arrives, hide the full‐page spinner
         if (isFirst) setLoading(false);
-
-        // if there's more, fetch the next batch (quietly)
-        if (nextCursor) {
-          fetchPage(nextCursor, false);
-        }
+        if (nextCursor) fetchPage(nextCursor, false);
       } catch (e) {
         console.error(e);
         if (isMounted) {
@@ -35,223 +29,283 @@ export default function Home() {
         }
       }
     };
-
     fetchPage();
-
-    return () => {
-      isMounted = false;
-    };
+    return () => { isMounted = false; };
   }, []);
+
+  // filter rows by company name
+  const filteredRows = rows.filter(r =>
+    r.company.toLowerCase().includes(searchTerm.trim().toLowerCase())
+  );
 
   if (loading) {
     return (
+     
       <div className="loading-container">
-        <div className="spinner" />
-        <p className="status-message">Loading…</p>
+        <div className="spinner"></div>
+        <p className="status-message">Fetching wisdom from the best minds…</p>
+  
         <style jsx>{`
           .loading-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
             height: 100vh;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            flex-direction: column;
-            background-color: #f2f4f7;
-            z-index: 999;
+            background: #f5f7fa;
           }
+  
           .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid #e0e0e0;
-            border-top: 5px solid #3498db;
+            border: 6px solid #e0e0e0;
+            border-top: 6px solid #6c63ff;
             border-radius: 50%;
+            width: 60px;
+            height: 60px;
             animation: spin 1s linear infinite;
-            margin-bottom: 1rem;
           }
+  
           @keyframes spin {
-            0% { transform: rotate(0deg); }
+            0%   { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
           }
+  
           .status-message {
-            text-align: center;
-            color: #7f8c8d;
-            font-size: 1.25rem;
+            margin-top: 1.25rem;
+            font-size: 1.125rem;
+            font-weight: 500;
+            color: #333;
           }
         `}</style>
       </div>
     );
   }
-
+  
   if (error) {
     return <p className="status-message error">Error: {error}</p>;
   }
 
   return (
-    <div className="container">
-    {/* ─── HEADER WITH BUTTON ─────────────────────────────── */}
-    <div className="header">
-      <h1>Wolf Mentoring Top Interviews Till Date</h1>
-      <Link href="/book-call" legacyBehavior>
-        <a className="call-button">BOOK A CALL NOW</a>
-      </Link>
-    </div>
-      {rows.length === 0 ? (
-        <p className="status-message">No interviews found.</p>
-      ) : (
-        <div className="table-wrapper">
-          <table>
-            <colgroup>
-              <col style={{ width: '50%' }} />
-              <col style={{ width: '30%' }} />
-              <col style={{ width: '20%' }} />
-            </colgroup>
-            <thead>
-              <tr>
-                <th>Title</th>
-                <th>Company</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row, i) => (
-                <tr key={i}>
-                  <td>
-                    <a href={row.url} target="_blank" rel="noopener noreferrer">
-                      {row.title}
-                    </a>
-                  </td>
-                  <td>{row.company}</td>
-                  <td>{row.date}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+    <div className="main-wrapper">
+      {/* LEFT: Table and Header */}
+      <div className="left-content">
+      <div className="header-section">
+        <h1>🚀 Wolf Mentoring Service</h1>
+        <p className="subtext">Top Interviews Till Date — Learn from the best, grow your career</p>
+      </div>
+
+        {/* SEARCH BAR */}
+        <div className="search-container">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            placeholder="Search by company…"
+          />
         </div>
-      )}
-
+  
+        {/* TABLE OR EMPTY */}
+        {filteredRows.length === 0 ? (
+          <p className="status-message">
+            {searchTerm ? 'No matching companies found.' : 'No interviews found.'}
+          </p>
+        ) : (
+          <div className="table-wrapper">
+            <table>
+              <colgroup>
+                <col style={{ width: '50%' }} />
+                <col style={{ width: '30%' }} />
+                <col style={{ width: '20%' }} />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Company</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredRows.map((row, i) => (
+                  <tr key={i}>
+                    <td>{row.title}</td>
+                    <td>{row.company}</td>
+                    <td>{row.date}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+  
+      {/* RIGHT: Call to Action */}
+      <div className="right-sidebar">
+        <div className="cta-container">
+          <p className="cta-text">Best mentoring for your career.</p>
+          <Link href="/book-call" legacyBehavior>
+            <a className="call-button">BOOK A CALL NOW</a>
+          </Link>
+        </div>
+      </div>
+  
       <style jsx>{`
-         /* ── Container + Header ── */
-        .container {
-          max-width: 1200px;
-          margin: 2rem auto;
-          padding: 2rem;
-          background: #fff;
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI',
-            Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue',
-            sans-serif;
-        }
-        .header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 1.5rem;
-        }
-        h1 {
-          font-size: 2.5rem;
-          color: #2c3e50;
-          margin: 0;
-          font-weight: 700;
-        }
+          :global(body) {
+              font-family: 'Poppins', sans-serif;
+              background: #F9FAFB;
+              color: #111827;
+              margin: 0;
+              padding: 0;
+            }
 
-        /* ── Beautiful Pill Button ── */
-        .call-button {
-          display: inline-block;
-          background: linear-gradient(135deg, #6c63ff, #3f3cfd);
-          color: #fff;
-          padding: 0.75rem 1.75rem;
-          font-size: 1rem;
-          font-weight: 600;
-          border-radius: 9999px;
-          text-decoration: none;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-          transition: background 0.3s ease,
-                      transform 0.2s ease,
-                      box-shadow 0.2s ease;
-        }
-        .call-button:hover {
-          background: linear-gradient(135deg, #5a52e6, #3430e0);
-          transform: translateY(-2px);
-          box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-        }
-        .call-button:active {
-          transform: translateY(0);
-          box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
-        }
 
-        .status-message {
-          text-align: center;
-          color: #7f8c8d;
-          font-size: 1.125rem;
-          margin-top: 2rem;
-        }
-        .status-message.error {
-          color: #c0392b;
-        }
+          .header-section {
+            text-align: center;
+            margin-bottom: 2rem;
+          }
 
-        .container {
-          max-width: 1200px;
-          margin: 2rem auto;
-          padding: 2rem;
-          background-color: #ffffff;
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-            Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-        }
-       
+          .header-section h1 {
+            font-size: 2.75rem;
+            font-weight: 800;
+            background: linear-gradient(to right,rgb(3, 3, 3),rgb(5, 5, 5));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0;
+          }
 
-        .table-wrapper {
-          max-height: 600px;
-          overflow-y: auto;
-          border: 1px solid #dfe3e8;
-        }
+          .subtext {
+            font-size: 1.25rem;
+            color: #4B5563;
+            margin-top: 0.5rem;
+            font-weight: 500;
+          }
 
-        table {
-          width: 100%;
-          border-collapse: collapse;
-          table-layout: fixed;
-        }
-        th,
-        td {
-          padding: 1rem 1.25rem;
-          text-align: left;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-        th {
-          background: #2c3e50;
-          color: #ffffff;
-          font-weight: 600;
-          border-bottom: 2px solid #1a252f;
-        }
-        tbody tr {
-          border-bottom: 1px solid #dfe3e8;
-        }
-        tbody tr:nth-child(even) {
-          background: #f9fbfc;
-        }
-        tbody tr:hover {
-          background: #eaeff2;
-        }
-        a {
-          color: #2980b9;
-          text-decoration: none;
-          font-weight: 500;
-        }
-        a:hover {
-          text-decoration: underline;
-        }
+          .main-wrapper {
+            display: flex;
+            flex-direction: row;
+            max-width: 1200px;
+            margin: 2rem auto;
+            gap: 2rem;
+            padding: 0 1rem;
+          }
 
-        .container,
-        .table-wrapper,
-        table,
-        th,
-        td {
-          border-radius: 0;
-        }
-      `}</style>
+          .left-content {
+            flex: 3;
+          }
+
+          .right-sidebar {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+
+          .cta-container {
+            width: 100%;
+            max-width: 260px;
+            background: #FFFFFF;
+            padding: 2rem 1.5rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border: 1px solid #E5E7EB;
+          }
+
+          .cta-text {
+            font-size: 1.125rem;
+            margin-bottom: 1rem;
+            color: #374151;
+            font-weight: 600;
+            line-height: 1.6;
+          }
+
+          .call-button {
+            display: inline-block;
+            background: linear-gradient(to right, #F8C319, #F8C319);
+            color: #111;
+            padding: 0.75rem 1.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 9999px;
+            text-decoration: none;
+            box-shadow: 0 6px 18px rgba(215, 223, 128, 0.3);
+            transition: background 0.3s ease, transform 0.2s ease;
+          }
+
+          .call-button:hover {
+            background: linear-gradient(to right,rgb(224, 229, 70),rgb(228, 240, 59));
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(230, 243, 184, 0.35);
+          }
+
+          .search-container {
+            margin: 1.5rem 0;
+            text-align: center;
+          }
+
+          .search-container input {
+            width: 300px;
+            max-width: 100%;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            border: 1px solid #D1D5DB;
+            border-radius: 9999px;
+            outline: none;
+            background: white;
+            color: #111827;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+          }
+
+          .search-container input:focus {
+            border-color:rgb(197, 247, 17);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+          }
+
+          .table-wrapper {
+            max-height: 600px;
+            overflow-y: auto;
+            border: 1px solid #E5E7EB;
+            border-radius: 12px;
+            background: #FFFFFF;
+          }
+
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+          }
+
+          th,
+          td {
+            padding: 1rem 1.25rem;
+            text-align: left;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+
+          th {
+            background: #F8C319;
+            color: #111827;
+            font-weight: 600;
+            border-bottom: 2px solid rgb(249, 229, 46);
+          }
+
+          tbody tr {
+            border-bottom: 1px solid #E5E7EB;
+          }
+
+          tbody tr:nth-child(even) {
+            background: #F3F4F6;
+          }
+
+          tbody tr:hover {
+            background: #E0E7FF;
+          }
+        `}</style>
+
     </div>
   );
+  
 }
