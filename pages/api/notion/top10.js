@@ -46,18 +46,30 @@ export default async function handler(req, res) {
     });
 
     // Format & filter out any “—” rows if you like
-    const formatted = results
-      .map(page => {
+    const formatted = results.map(page => {
         const p = page.properties;
         return {
-          title:   extractText(p.Name),
-          company: getCompanyName(p.Company),
-          date:    extractText(p.Date),
+          title: Array.isArray(p["Job Title"]?.title)
+                              ? p["Job Title"].title.map(t => t.plain_text).join('').trim()
+                              : '—',
+          company: p["Company"]?.rich_text?.[0]?.plain_text || '—',
+          date: p["Date"]?.date?.start
+                              ? new Date(p["Date"].date.start).toLocaleDateString('en-IN') // or 'en-US'
+                              : '—',
           url:     page.url || '#',
         };
-      })
-      .filter(r => r.title !== '—' && r.company !== '—' && r.date !== '—');
-
+      });
+      
+      const filtered = formatted.filter(
+        r =>
+          r.title &&
+          r.title.trim() !== '' &&
+          r.company &&
+          r.company.trim() !== '' &&
+          r.date &&
+          r.date.trim() !== ''
+      );
+      
     res.status(200).json({ results: formatted });
   } catch (err) {
     console.error('Top10 API Error:', err);
