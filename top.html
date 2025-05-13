@@ -1,0 +1,67 @@
+<!-- Wolf Mentoring – Top 10 Interviews -->
+<style>
+    /* (Copy your existing table/card styles here) */
+    #wolf-table-wrapper table { width:100%; border-collapse:collapse; }
+    #wolf-table-wrapper th {
+      background:#2c3e50; color:#fff; padding:.75rem 1rem;
+      text-align:left; font-weight:600; border-bottom:2px solid #1a252f;
+    }
+    #wolf-table-wrapper td {
+      padding:.75rem 1rem; border-bottom:1px solid #dfe3e8;
+    }
+    #wolf-table-wrapper tr:nth-child(even) { background:#f9fbfc; }
+    #wolf-table-wrapper tr:hover { background:#eaeff2; }
+    #wolf-table-wrapper a { color:#2980b9; text-decoration:none; }
+    #wolf-table-wrapper a:hover { text-decoration:underline; }
+  </style>
+  
+  <div id="wolf-dashboard" style="max-width:1000px;margin:0 auto;padding:2rem;font-family:sans-serif;">
+    <h2 style="text-align:center;font-size:2rem;color:#2c3e50;font-weight:700;margin-bottom:1.5rem;">
+      Wolf Mentoring – Top 10 Interviews
+    </h2>
+    <div id="wolf-table-wrapper" style="max-height:400px;overflow-y:auto;border:1px solid #dfe3e8;"></div>
+  </div>
+  
+  <script>
+    (async function loadWolfTable() {
+      const API_URL = 'http://localhost:3000/api/notion/top10'; // ← update this
+  
+      try {
+        const res = await fetch(API_URL);
+        if (!res.ok) throw new Error(res.statusText);
+        const { results } = await res.json();
+  
+        // Build table
+        const table = document.createElement('table');
+        table.innerHTML = `
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Company</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${results.map((row,i) => `
+              <tr>
+                <td>
+                  <a href="${row.url}" target="_blank" rel="noopener noreferrer">
+                    ${row.title}
+                  </a>
+                </td>
+                <td>${row.company}</td>
+                <td>${row.date}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        `;
+  
+        document.getElementById('wolf-table-wrapper').appendChild(table);
+      } catch (err) {
+        console.error('Failed to load table:', err);
+        document.getElementById('wolf-table-wrapper').innerHTML =
+          '<p style="padding:1rem;color:#c0392b;text-align:center;">Error loading data</p>';
+      }
+    })();
+  </script>
+  

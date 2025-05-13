@@ -1,28 +1,46 @@
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 
 export default function Home() {
-  const [rows, setRows] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [rows, setRows]         = useState([]);
+  const [loading, setLoading]   = useState(true);
+  const [error, setError]       = useState(null);
 
   useEffect(() => {
-    async function load() {
-      try {
-        const res = await fetch('/api/notion');
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const json = await res.json();
+    let isMounted = true;
 
-        // Consume flattened results from the API
-        const data = Array.isArray(json.results) ? json.results : [];
-        setRows(data);
+    // Recursive fetcher: grabs one “page” (up to 100 rows) at a time
+    const fetchPage = async (cursor = null, isFirst = true) => {
+      try {
+        const qs = cursor ? `?cursor=${cursor}` : '';
+        const res = await fetch(`/api/notion${qs}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const { results, nextCursor } = await res.json();
+
+        if (!isMounted) return;
+        // append new batch
+        setRows(prev => [...prev, ...results]);
+        // after first batch arrives, hide the full‐page spinner
+        if (isFirst) setLoading(false);
+
+        // if there's more, fetch the next batch (quietly)
+        if (nextCursor) {
+          fetchPage(nextCursor, false);
+        }
       } catch (e) {
         console.error(e);
-        setError(e.message);
-      } finally {
-        setLoading(false);
+        if (isMounted) {
+          setError(e.message);
+          setLoading(false);
+        }
       }
-    }
-    load();
+    };
+
+    fetchPage();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   if (loading) {
@@ -67,11 +85,19 @@ export default function Home() {
     );
   }
 
-  if (error) return <p className="status-message error">Error: {error}</p>;
+  if (error) {
+    return <p className="status-message error">Error: {error}</p>;
+  }
 
   return (
     <div className="container">
+    {/* ─── HEADER WITH BUTTON ─────────────────────────────── */}
+    <div className="header">
       <h1>Wolf Mentoring Top Interviews Till Date</h1>
+      <Link href="/book-call" legacyBehavior>
+        <a className="call-button">BOOK A CALL NOW</a>
+      </Link>
+    </div>
       {rows.length === 0 ? (
         <p className="status-message">No interviews found.</p>
       ) : (
@@ -107,6 +133,54 @@ export default function Home() {
       )}
 
       <style jsx>{`
+         /* ── Container + Header ── */
+        .container {
+          max-width: 1200px;
+          margin: 2rem auto;
+          padding: 2rem;
+          background: #fff;
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI',
+            Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue',
+            sans-serif;
+        }
+        .header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 1.5rem;
+        }
+        h1 {
+          font-size: 2.5rem;
+          color: #2c3e50;
+          margin: 0;
+          font-weight: 700;
+        }
+
+        /* ── Beautiful Pill Button ── */
+        .call-button {
+          display: inline-block;
+          background: linear-gradient(135deg, #6c63ff, #3f3cfd);
+          color: #fff;
+          padding: 0.75rem 1.75rem;
+          font-size: 1rem;
+          font-weight: 600;
+          border-radius: 9999px;
+          text-decoration: none;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          transition: background 0.3s ease,
+                      transform 0.2s ease,
+                      box-shadow 0.2s ease;
+        }
+        .call-button:hover {
+          background: linear-gradient(135deg, #5a52e6, #3430e0);
+          transform: translateY(-2px);
+          box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+        .call-button:active {
+          transform: translateY(0);
+          box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+        }
+
         .status-message {
           text-align: center;
           color: #7f8c8d;
@@ -125,13 +199,7 @@ export default function Home() {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
             Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
         }
-        h1 {
-          text-align: center;
-          font-size: 2.5rem;
-          color: #2c3e50;
-          margin-bottom: 1.5rem;
-          font-weight: 700;
-        }
+       
 
         .table-wrapper {
           max-height: 600px;
