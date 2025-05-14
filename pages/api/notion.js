@@ -110,8 +110,13 @@ export default async function handler(req, res) {
                             : '—',
         company: p["Company"]?.rich_text?.[0]?.plain_text || '—',
         date: p["Date"]?.date?.start
-                            ? new Date(p["Date"].date.start).toLocaleDateString('en-IN') // or 'en-US'
-                            : '—',
+                    ? new Date(p["Date"].date.start).toLocaleDateString('en-GB', {
+                        day: '2-digit',
+                        month: 'short', // or 'long' for full month name
+                        year: 'numeric',
+                      })
+                    : '—',
+
         url:     page.url || '#',
       };
     });

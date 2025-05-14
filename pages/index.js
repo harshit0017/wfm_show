@@ -135,7 +135,7 @@ export default function Home() {
             </table>
           </div>
         )}
-      </div>
+    </div>
   
       {/* RIGHT: Call to Action */}
       <div className="right-sidebar">
@@ -146,6 +146,14 @@ export default function Home() {
           </Link>
         </div>
       </div>
+
+      {/* Compact mobile CTA (only visible on small screens) */}
+      <div className="mobile-cta-strip">
+        <Link href="/book-call" legacyBehavior>
+          <a className="mobile-call-button">BOOK A CALL NOW</a>
+        </Link>
+      </div>
+
   
       <style jsx>{`
           :global(body) {
@@ -185,17 +193,23 @@ export default function Home() {
             margin: 2rem auto;
             gap: 2rem;
             padding: 0 1rem;
+            
+            min-height: 100vh; /* ⬅️ Add this to allow vertical centering */
+            align-items: stretch; /* Make children (like sidebar) fill height */
+
           }
 
           .left-content {
-            flex: 3;
+            flex: 4;
           }
 
           .right-sidebar {
-            flex: 1;
+            flex: 1.2;
             display: flex;
             align-items: center;
             justify-content: center;
+            flex-shrink: 0;
+            min-width: 260px;
           }
 
           .cta-container {
@@ -268,6 +282,7 @@ export default function Home() {
             border: 1px solid #E5E7EB;
             border-radius: 12px;
             background: #FFFFFF;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
           }
 
           table {
@@ -303,6 +318,101 @@ export default function Home() {
           tbody tr:hover {
             background: #E0E7FF;
           }
+          .mobile-cta-strip {
+            display: none;
+          }
+
+          @media (max-width: 768px) {
+          .mobile-cta-strip {
+            display: block;
+          }
+
+          .right-sidebar {
+            display: none;
+          }
+          .header-section {
+            margin-bottom: 1rem;
+            margin-top: 1rem; /* Add this if missing */
+          }
+
+          .header-section h1 {
+            font-size: 1.4rem;
+            margin-bottom: 0.25rem;
+          }
+
+          .subtext {
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+          }
+
+          .main-wrapper {
+            flex-direction: column;
+            padding: 0 1rem;
+          
+          }
+
+          .mobile-cta-strip {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background:#fff ;
+            padding: 0.5rem 1rem;
+            text-align: center;
+            z-index: 999;
+            border-top: 1px solid #e5e7eb;
+          }
+
+          .mobile-call-button {
+            display: inline-block;
+            font-size: 0.95rem;
+            font-weight: 600;
+            padding: 0.5rem 1.25rem;
+            background: #F8C319;
+            color: #111;
+            border-radius: 9999px;
+            text-decoration: none;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          }
+
+          .table-wrapper {
+            max-height: calc(100vh - 240px);
+            overflow-y: auto;
+            border-radius:8px;
+            border: 1px solid #e5e7eb;
+            margin-top: 0.25rem;
+
+          }
+
+          table {
+            width: 100%;
+            table-layout: fixed;
+            font-size: 0.75rem;
+            border-collapse: collapse;
+          }
+
+          th, td {
+            padding: 0.5rem 0.6rem;
+            font-size: 0.8rem;
+            white-space: normal;
+            word-break: break-word;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+
+          .search-container{
+            margin: 0.5rem 0;
+          }
+         
+          .search-container input {
+            width: 80%;
+            font-size: 0.9rem;
+            
+          }
+        }
+
+
+
         `}</style>
 
     </div>

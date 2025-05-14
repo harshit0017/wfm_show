@@ -24,7 +24,7 @@
   
   <script>
     (async function loadWolfTable() {
-      const API_URL = 'http://34.220.144.31/:3000/api/notion/top10'; // ← update this
+      const API_URL = 'https://interviews.wolfmentoring.com/api/notion/top10'; // ← update this
   
       try {
         const res = await fetch(API_URL);
@@ -45,9 +45,9 @@
             ${results.map((row,i) => `
               <tr>
                 <td>
-                  <a href="${row.url}" target="_blank" rel="noopener noreferrer">
+                  
                     ${row.title}
-                  </a>
+                  
                 </td>
                 <td>${row.company}</td>
                 <td>${row.date}</td>

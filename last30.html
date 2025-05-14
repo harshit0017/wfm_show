@@ -1,0 +1,82 @@
+<!-- 🌟 Inline Spinning Interview Count (0–100) -->
+<style>
+    .inline-counter {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 500;
+      color: #2c3e50;
+    }
+  
+    .inline-count {
+      display: inline-block;
+      min-width: 2ch;
+      font-weight: 700;
+      color: #F8C319;
+      animation: spin 0.4s linear infinite;
+      transition: all 0.3s ease;
+    }
+  
+    @keyframes spin {
+      0%   { transform: rotateX(0deg); }
+      100% { transform: rotateX(360deg); }
+    }
+  
+    .freeze {
+      animation: none;
+    }
+  </style>
+  
+  <div class="inline-counter">
+    🚀 In the last 30 days, <span id="inline-count" class="inline-count">--</span> interviews were landed!
+  </div>
+  
+  <script>
+    (function () {
+      const el = document.getElementById('inline-count');
+      const API_URL = 'https://interviews.wolfmentoring.com/api/notion/last30';
+  
+      // Step 1: Start spinning immediately with 0–100
+      let spinning = true;
+      const spinInterval = setInterval(() => {
+        if (spinning) {
+          el.textContent = Math.floor(Math.random() * 101); // 0 to 100
+        }
+      }, 60);
+  
+      // Step 2: Fetch real value and animate to it
+      fetch(API_URL)
+        .then(res => res.json())
+        .then(({ count }) => {
+          spinning = false;
+          clearInterval(spinInterval);
+  
+          el.classList.add('freeze');
+  
+          let start = parseInt(el.textContent, 10) || 0;
+          const end = count;
+          const duration = 800;
+          const frameRate = 60;
+          const totalFrames = Math.round((duration / 1000) * frameRate);
+          let frame = 0;
+          const easeOut = t => 1 - Math.pow(1 - t, 3);
+  
+          const animateUp = setInterval(() => {
+            frame++;
+            const progress = easeOut(frame / totalFrames);
+            const current = Math.round(start + (end - start) * progress);
+            el.textContent = current;
+            if (frame === totalFrames) {
+              clearInterval(animateUp);
+              el.textContent = end;
+            }
+          }, duration / totalFrames);
+        })
+        .catch(() => {
+          spinning = false;
+          clearInterval(spinInterval);
+          el.classList.add('freeze');
+          el.textContent = '—';
+        });
+    })();
+  </script>
+  
