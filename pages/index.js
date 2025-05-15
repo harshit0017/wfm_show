@@ -96,10 +96,10 @@ export default function Home() {
           </Link>
 
           {/* pill button */}
-          <Link href="" legacyBehavior>
+          <Link href="https://www.youtube.com/playlist?list=PLvDlUVdyOIB8vorDYdhBE-1B3B6QMjeoG" legacyBehavior>
             <a className="results-pill">
               <span className="star">✹</span>
-              Results we've landed!
+              Watch Client Testimonials
             </a>
           </Link>
         </div>
