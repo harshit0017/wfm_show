@@ -97,7 +97,7 @@ export default function Home() {
 
           {/* pill button */}
           <Link href="https://www.youtube.com/playlist?list=PLvDlUVdyOIB8vorDYdhBE-1B3B6QMjeoG" legacyBehavior>
-            <a className="results-pill">
+            <a className="results-pill" target="_blank" rel="noopener noreferrer">
               <span className="star">✹</span>
               Watch Client Testimonials
             </a>
