@@ -15,12 +15,6 @@ function extractText(prop) {
   return text || '—';
 }
 
-/**
- * Given a URL string, pull out the company slug from known patterns:
- *  • linkedin.com/company/SLUG
- *  • indeed.com/cmp/SLUG
- * Falls back to hostname if no pattern matches.
- */
 function extractCompanyFromUrl(rawUrl) {
   try {
     // LinkedIn pattern
@@ -39,12 +33,7 @@ function extractCompanyFromUrl(rawUrl) {
   }
 }
 
-/**
- * Normalize whatever Notion gives you in the Company property:
- * 1) If it's a URL property, extract company via extractCompanyFromUrl
- * 2) If it's rich_text, get the text; if that text looks like a URL, extract from it
- * 3) Otherwise just return the text
- */
+
 function getCompanyName(prop) {
   if (!prop) return '—';
 
@@ -86,22 +75,8 @@ export default async function handler(req, res) {
         page_size: 100,
       });
     
-    console.log('✅ Raw Notion Response:', JSON.stringify(results, null, 2));
+    // console.log('✅ Raw Notion Response:', JSON.stringify(results, null, 2));
 
-
-    // const formatted = results.map(page => {
-    //   const p = page.properties;
-    //   return {
-    //     title: extractText(p["Job Title"] ?? p.Name),
-    //     company: getCompanyName(p.Company),
-    //     date:    extractText(p.Date),
-    //     url:     page.url ?? '#',
-    //   };
-    // });
-    // // 2) Filter out any “empty” rows where title, company or date is just “—”
-    // const filtered = formatted.filter(
-    //   r => r.title !== '—' && r.company !== '—' && r.date !== '—'
-    // );
     const formatted = results.map(page => {
       const p = page.properties;
       return {
@@ -140,7 +115,7 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('❌ Notion API Error:', error);
+    // console.error('❌ Notion API Error:', error);
     res.status(500).json({ error: error.message });
   }
 }

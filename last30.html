@@ -1,82 +1,146 @@
-<!-- 🌟 Inline Spinning Interview Count (0–100) -->
+<!-- 🔁 Seamless + Controlled Interview Count -->
 <style>
-    .inline-counter {
-      font-family: 'Poppins', sans-serif;
-      font-size: 1.15rem;
-      font-weight: 500;
-      color: #2c3e50;
+  .counter-card {
+    max-width: 240px;
+    margin: 2rem auto;
+    padding: 1.5rem;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    text-align: center;
+    font-family: -apple-system, BlinkMacSystemFont,
+      'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
+      'Open Sans', 'Helvetica Neue', sans-serif;
+  }
+
+  .counter-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .counter-value {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #2c3e50;
+    min-height: 1em;
+  }
+</style>
+
+<div class="counter-card">
+  <div class="counter-label">interviews landed in the last 30 days!</div>
+  <div id="inline-count" class="counter-value">0</div>
+</div>
+
+<script>
+  (function () {
+    const el = document.getElementById('inline-count');
+    const API_URL = 'https://interviews.wolfmentoring.com/api/notion/last30';
+
+    // Initialize counter state
+    let currentValue = 0;
+    let targetValue = null;
+    let isAnimating = true;
+    
+    // Animation parameters
+    const initialSpeed = 1; // Initial increment value (reduced from 3)
+    const initialInterval = 350; // Initial interval in ms (increased from 120)
+    const slowdownThreshold = 0.7; // When to start slowing down (70% of estimated value)
+    
+    // Estimate range - we'll start slowing down at this percentage
+    const estimatedCount = 80; // Reasonable estimate based on business knowledge
+    
+    // For smooth animation once real value is known
+    let animationFrame;
+    
+    // Function to animate count with variable speed
+    function animatePlaceholderCount() {
+      // If we have the real value, stop this animation
+      if (targetValue !== null) return;
+      
+      // Calculate current increment based on value
+      let increment = initialSpeed;
+      
+      // Slow down as we approach the estimated value
+      if (currentValue > estimatedCount * slowdownThreshold) {
+        const remainingPercentage = 1 - (currentValue / estimatedCount);
+        increment = Math.max(1, Math.floor(initialSpeed * remainingPercentage * 2));
+      }
+      
+      // Update the display
+      currentValue += increment;
+      el.textContent = currentValue;
+      
+      // Schedule next update with possibly variable interval
+      setTimeout(animatePlaceholderCount, initialInterval);
     }
-  
-    .inline-count {
-      display: inline-block;
-      min-width: 2ch;
-      font-weight: 700;
-      color: #F8C319;
-      animation: spin 0.4s linear infinite;
-      transition: all 0.3s ease;
-    }
-  
-    @keyframes spin {
-      0%   { transform: rotateX(0deg); }
-      100% { transform: rotateX(360deg); }
-    }
-  
-    .freeze {
-      animation: none;
-    }
-  </style>
-  
-  <div class="inline-counter">
-    🚀 In the last 30 days, <span id="inline-count" class="inline-count">--</span> interviews were landed!
-  </div>
-  
-  <script>
-    (function () {
-      const el = document.getElementById('inline-count');
-      const API_URL = 'https://interviews.wolfmentoring.com/api/notion/last30';
-  
-      // Step 1: Start spinning immediately with 0–100
-      let spinning = true;
-      const spinInterval = setInterval(() => {
-        if (spinning) {
-          el.textContent = Math.floor(Math.random() * 101); // 0 to 100
+    
+    // Start the placeholder animation immediately
+    animatePlaceholderCount();
+    
+    // Fetch the real data
+    fetch(API_URL)
+      .then(res => res.json())
+      .then(({ count }) => {
+        // Store real target value
+        targetValue = count;
+        
+        // If our placeholder already exceeded the real value, adjust accordingly
+        if (currentValue > targetValue) {
+          // Animate smoothly down to the real value
+          animateToTargetValue(currentValue, targetValue, 800, 'easeInOut');
+        } else if (currentValue < targetValue) {
+          // Animate smoothly up to the real value
+          animateToTargetValue(currentValue, targetValue, 1200, 'easeOut');
         }
-      }, 60);
-  
-      // Step 2: Fetch real value and animate to it
-      fetch(API_URL)
-        .then(res => res.json())
-        .then(({ count }) => {
-          spinning = false;
-          clearInterval(spinInterval);
-  
-          el.classList.add('freeze');
-  
-          let start = parseInt(el.textContent, 10) || 0;
-          const end = count;
-          const duration = 800;
-          const frameRate = 60;
-          const totalFrames = Math.round((duration / 1000) * frameRate);
-          let frame = 0;
-          const easeOut = t => 1 - Math.pow(1 - t, 3);
-  
-          const animateUp = setInterval(() => {
-            frame++;
-            const progress = easeOut(frame / totalFrames);
-            const current = Math.round(start + (end - start) * progress);
-            el.textContent = current;
-            if (frame === totalFrames) {
-              clearInterval(animateUp);
-              el.textContent = end;
-            }
-          }, duration / totalFrames);
-        })
-        .catch(() => {
-          spinning = false;
-          clearInterval(spinInterval);
-          el.classList.add('freeze');
-          el.textContent = '—';
-        });
-    })();
-  </script>
-  
+      })
+      .catch(() => {
+        // Stop animation and show error indicator
+        isAnimating = false;
+        el.textContent = '—';
+      });
+    
+    // Sophisticated animation function with easing
+    function animateToTargetValue(from, to, duration, easingType) {
+      const startTime = performance.now();
+      const change = to - from;
+      
+      // Easing functions
+      const easings = {
+        linear: t => t,
+        easeOut: t => 1 - Math.pow(1 - t, 3),
+        easeIn: t => t * t * t,
+        easeInOut: t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
+      };
+      
+      const easing = easings[easingType] || easings.easeOut;
+      
+      function updateFrame(currentTime) {
+        const elapsedTime = currentTime - startTime;
+        
+        if (elapsedTime < duration) {
+          // Calculate progress with easing
+          const progress = easing(elapsedTime / duration);
+          
+          // Update current value
+          currentValue = Math.round(from + change * progress);
+          el.textContent = currentValue;
+          
+          // Request next frame
+          animationFrame = requestAnimationFrame(updateFrame);
+        } else {
+          // Animation complete
+          currentValue = to;
+          el.textContent = to;
+          isAnimating = false;
+        }
+      }
+      
+      // Start the animation
+      animationFrame = requestAnimationFrame(updateFrame);
+    }
+  })();
+</script>

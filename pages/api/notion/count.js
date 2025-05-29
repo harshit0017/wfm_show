@@ -32,7 +32,7 @@ export default async function handler(req, res) {
     const count = await getTotalCount();
     res.status(200).json({ count });
   } catch (error) {
-    console.error('Count API Error:', error);
+    // console.error('Count API Error:', error);
     res.status(500).json({ error: error.message });
   }
 }

@@ -37,7 +37,7 @@ export default async function handler(req, res) {
 
     res.status(200).json({ count: recent.length });
   } catch (error) {
-    console.error('Error fetching last 30 day interviews:', error);
+    // console.error('Error fetching last 30 day interviews:', error);
     res.status(500).json({ error: 'Failed to fetch data from Notion' });
   }
 }

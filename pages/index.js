@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import Head from 'next/head';
 import Link from 'next/link';
 
 export default function Home() {
@@ -14,7 +15,7 @@ export default function Home() {
         const qs = cursor ? `?cursor=${cursor}` : '';
         const res = await fetch(`/api/notion${qs}`);
       
-        console.log("✅ Fetched data:", res);
+ 
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const { results, nextCursor } = await res.json();
         if (!isMounted) return;
@@ -22,7 +23,7 @@ export default function Home() {
         if (isFirst) setLoading(false);
         if (nextCursor) fetchPage(nextCursor, false);
       } catch (e) {
-        console.error(e);
+      
         if (isMounted) {
           setError(e.message);
           setLoading(false);
@@ -85,6 +86,20 @@ export default function Home() {
 
   return (
     <>
+    <Head>
+        {/* Google Analytics */}
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-8PLLB34FQS"></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-8PLLB34FQS', { cookie_domain: 'auto' });
+            `,
+          }}
+        />
+      </Head>
       {/* ─── TOP STRIP ───────────────────────────────────────────── */}
       <div className="top-strip">
         <div className="strip-content">

@@ -76,7 +76,7 @@ export default async function handler(req, res) {
       
     res.status(200).json({ results: formatted });
   } catch (err) {
-    console.error('Top10 API Error:', err);
+    // console.error('Top10 API Error:', err);
     res.status(500).json({ error: err.message });
   }
 }
