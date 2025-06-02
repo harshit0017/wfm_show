@@ -86,7 +86,13 @@ export default function Home() {
 
   return (
     <>
+
     <Head>
+        {/* Primary Meta Tags */}
+        <title>IT & Tech Leadership Interviews Landed by Wolf Mentoring Clients</title>
+        <meta name="title" content="IT & Tech Leadership Interviews Landed by Wolf Mentoring Clients" />
+        <meta name="description" content="Full list of Interviews landed for our clients through our Done-for-You Job Search Service" />
+        
         {/* Google Analytics */}
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-8PLLB34FQS"></script>
         <script
