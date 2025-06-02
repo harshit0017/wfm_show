@@ -13,6 +13,22 @@ export default function Document() {
         />
         {/* Favicon */}
         <link rel="icon" href="/favicon.ico" />
+        
+        {/* Google Analytics */}
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-8PLLB34FQS"></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-8PLLB34FQS', { 
+                cookie_domain: 'auto',
+                page_path: window.location.pathname
+              });
+            `,
+          }}
+        />
       </Head>
       <body>
         <Main />
